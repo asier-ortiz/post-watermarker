@@ -50,8 +50,15 @@ for filename in os.listdir(INPUT_FOLDER):
         logo_rounded = ImageOps.fit(logo_resized, mask.size)
         logo_rounded.putalpha(mask)
 
-        # Calculate position: bottom right corner
-        position = (img_w - logo_target_width - MARGIN, img_h - logo_target_height - MARGIN)
+        # Offset settings
+        OFFSET_RATIO = 0.5  # Move 50% of the logo size inwards
+
+        # Calculate offset based on logo size
+        offset_x = int(logo_target_width * OFFSET_RATIO)
+        offset_y = int(logo_target_height * OFFSET_RATIO)
+
+        # Calculate position: top right corner, slightly shifted
+        position = (img_w - logo_target_width - MARGIN - offset_x, MARGIN + offset_y)
 
         # Paste the rounded logo onto the image
         img.paste(logo_rounded, position, logo_rounded)

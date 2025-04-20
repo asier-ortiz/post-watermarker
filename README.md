@@ -9,7 +9,7 @@ Small Python script that automates the addition of a personal brand logo to blog
 - Converts an SVG logo to PNG automatically.
 - Resizes the logo proportionally based on the image width.
 - Applies rounded corners to the logo.
-- Places the logo on the bottom right corner of each image.
+- Places the logo on the upper right corner of each image, with a margin and slight inward offset.
 - Batch processes all images in a folder.
 
 ---
