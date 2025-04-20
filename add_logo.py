@@ -63,4 +63,4 @@ for filename in os.listdir(INPUT_FOLDER):
 # Clean up the temporary logo file
 os.remove(logo_png_path)
 
-print("✅ All images have been processed!")
+print("All images have been processed!")
