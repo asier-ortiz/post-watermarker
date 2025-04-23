@@ -6,11 +6,12 @@ Small Python script that automates the addition of a personal brand logo to blog
 
 ## Features
 
-- Converts an SVG logo to PNG automatically.
+- Automatically converts an SVG logo to PNG.
 - Resizes the logo proportionally based on the image width.
-- Applies rounded corners to the logo.
-- Places the logo on the upper right corner of each image, with a margin and slight inward offset.
-- Batch processes all images in a folder.
+- Applies a **circular mask** and **custom opacity** to the logo.
+- Places the logo in the **bottom right corner** of each image, with a configurable offset from the edges.
+- Saves the resulting images in **PNG format**.
+- Batch processes all images in a specified folder.
 
 ---
 
