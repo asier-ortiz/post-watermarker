@@ -12,18 +12,18 @@ except ImportError:
         "    brew install cairo"
     )
 
-# General settings
-INPUT_FOLDER = "posts/"  # Folder where the images are located
-OUTPUT_FOLDER = "posts_with_logo/"  # Output folder for images with logo
-LOGO_SVG = "logo.svg"  # Logo file (must be in the project root)
-LOGO_SIZE_RATIO = 0.1  # Logo width will be 10% of the image width
-MARGIN = 20  # Margin in pixels from the edges
-CORNER_RADIUS = 20  # Corner radius for the rounded logo
+# General configuration
+INPUT_FOLDER = "posts/"
+OUTPUT_FOLDER = "posts_with_logo/"
+LOGO_SVG = "logo.svg"
+LOGO_SIZE_RATIO = 0.1       # Logo width as a percentage of the image width
+LOGO_OPACITY = 0.7          # Watermark opacity (0.0 to 1.0)
+OFFSET_PIXELS = 20          # Offset from the edges (in pixels)
 
 # Create the output folder if it doesn't exist
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Convert the SVG logo to PNG (in memory)
+# Convert the SVG logo to temporary PNG
 logo_png_path = "logo_temp.png"
 cairosvg.svg2png(url=LOGO_SVG, write_to=logo_png_path)
 logo = Image.open(logo_png_path).convert("RGBA")
@@ -43,31 +43,37 @@ for filename in os.listdir(INPUT_FOLDER):
         logo_target_height = int(logo_target_width * aspect_ratio)
         logo_resized = logo.resize((logo_target_width, logo_target_height), Image.LANCZOS)
 
-        # Create a rounded mask for the logo
-        mask = Image.new('L', logo_resized.size, 0)
+        # Create a circular mask
+        mask = Image.new("L", logo_resized.size, 0)
         draw = ImageDraw.Draw(mask)
-        draw.rounded_rectangle([0, 0, logo_target_width, logo_target_height], radius=CORNER_RADIUS, fill=255)
-        logo_rounded = ImageOps.fit(logo_resized, mask.size)
+        radius = min(logo_target_width, logo_target_height) // 2
+        center = (logo_target_width // 2, logo_target_height // 2)
+        draw.ellipse(
+            [center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius],
+            fill=255,
+        )
+
+        # Apply the mask and opacity
+        logo_rounded = logo_resized.copy()
         logo_rounded.putalpha(mask)
+        alpha = logo_rounded.split()[3].point(lambda p: int(p * LOGO_OPACITY))
+        logo_rounded.putalpha(alpha)
 
-        # Offset settings
-        OFFSET_RATIO = 0.5  # Move 50% of the logo size inwards
-
-        # Calculate offset based on logo size
-        offset_x = int(logo_target_width * OFFSET_RATIO)
-        offset_y = int(logo_target_height * OFFSET_RATIO)
-
-        # Calculate position: top right corner, slightly shifted
-        position = (img_w - logo_target_width - MARGIN - offset_x, MARGIN + offset_y)
+        # Position: bottom-right corner with offset
+        position = (
+            img_w - logo_target_width - OFFSET_PIXELS,
+            img_h - logo_target_height - OFFSET_PIXELS
+        )
 
         # Paste the rounded logo onto the image
         img.paste(logo_rounded, position, logo_rounded)
 
-        # Save the final image
-        output_path = os.path.join(OUTPUT_FOLDER, filename)
-        img.save(output_path)
+        # Save as .png
+        output_filename = os.path.splitext(filename)[0] + ".png"
+        output_path = os.path.join(OUTPUT_FOLDER, output_filename)
+        img.save(output_path, "PNG")
 
-# Clean up the temporary logo file
+# Remove the temporary logo file
 os.remove(logo_png_path)
 
-print("All images have been processed!")
+print("All images have been processed and saved in WebP format!")
